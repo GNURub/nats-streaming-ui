@@ -2,6 +2,7 @@ version: "3"
 services:
   nats-streaming:
     image: nats-streaming:latest
+    command: -cid test-cluster -m 8222 # -m Monitoring enabled
 
   nats-streaming-ui:
     build: .

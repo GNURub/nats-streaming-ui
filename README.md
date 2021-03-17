@@ -31,13 +31,14 @@ version: "3"
 services:
   nats-streaming:
     image: nats-streaming:latest
+    command: -cid test-cluster -m 8222 # -m Monitoring enabled
 
   nats-streaming-ui:
     image: 'gnurub/nats-streaming-ui:latest'
     environment:
       STAN_URL: "nats://nats-streaming:4222"
       STAN_MONITOR_URL: "http://nats-streaming:8222"
-      STAN_CLUSTER: "test-clusterd"
+      STAN_CLUSTER: "test-cluster"
     ports:
       - "8282:8282"
 ```
