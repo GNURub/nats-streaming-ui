@@ -1,25 +1,44 @@
 const axios = require("axios");
-const { getNerveInstance, options } = require("../settings");
+const { getStanInstance, options } = require("../settings");
 
 const memory = [];
 let monitoring = true;
+let connected = false;
 
 const handler = async client => {
-  const nerve = await getNerveInstance().catch(e => {
+  const stan = await getStanInstance().catch(e => {
     console.error(e);
   });
+
+  stan.on('connect', function () {
+    connected = true;
+    client.emit("is_online_result", connected);
+  });
+  
+  stan.on('disconnect', function () {
+    connected = false;
+    client.emit("is_online_result", connected);
+  });
+
   /**
    * @desc creating new channel
    */
-  const createChannel = async data => {
+  const createChannel = async (data) => {
     console.log('createChannel');
 
     if (monitoring) {
-      await nerve.publisher.publish(data.channelName, "\n");
+      stan.publish(data.channelName, "\n");
     } else {
       const channel = { name: data.channelName, messages: [] }
       memory.push(channel);
-      await nerve.subscribe(channel.name, msg => {
+      const opts = stan
+        .setDurableName(options.appName)
+        .subscriptionOptions()
+        .setDeliverAllAvailable()
+        .setManualAckMode(true);
+
+      const subscription = stan.subscribe(channel.name, opts);
+      subscription.on('message', (msg) => {
         channel.messages.push({
           sequence: msg.getSequence(),
           timestamp: msg.getTimestamp(),
@@ -36,9 +55,9 @@ const handler = async client => {
   /**
    * @desc sending message to the channel
    */
-  const sendMessage = async data => {
+  const sendMessage = async (data) => {
     console.log('sendMessage');
-    await nerve.publisher.publish(data.channelName, data.message);
+    stan.publish(data.channelName, data.message);
     client.emit("message_sent");
   };
 
@@ -127,7 +146,6 @@ const handler = async client => {
    * @desc getting dashboards data
    */
   const getDashboard = async () => {
-    console.log('getDashboard');
     try {
       const resp = await axios({
         method: "get",
@@ -185,7 +203,7 @@ const handler = async client => {
    * @param data
    * @returns {Promise<void>}
    */
-  const getMessages = async data => {
+  const getMessages = async (data) => {
     console.log('getMessages');
     const messages = [];
     let response;
@@ -201,7 +219,9 @@ const handler = async client => {
 
         const numOfMessages = response.data.msgs;
 
-        await nerve.subscribe(data.channelName, msg => {
+        const opts = stan.subscriptionOptions().setDeliverAllAvailable().setManualAckMode(true);
+        const subscription = stan.subscribe(data.channelName, opts)
+        subscription.on('message', (msg) => {
           messages.push({
             sequence: msg.getSequence(),
             timestamp: msg.getTimestamp(),
@@ -231,10 +251,7 @@ const handler = async client => {
    * @returns {Promise<void>}
    */
   const isOnline = async () => {
-    try{
-      const isConnected = nerve.conn.nc.connected || false;
-      client.emit("is_online_result", isConnected);
-    }catch (e) { }
+    client.emit("is_online_result", connected);
   };
 
   const isMonitoring = async () => {
@@ -252,6 +269,22 @@ const handler = async client => {
     }
   }
 
+  const isFTActive = async () => {
+    const resp = await axios({
+      method: "get",
+      baseURL: options.monitor,
+      url: "/streaming/isFTActive",
+      headers: { Accept: "application/json" },
+      proxy: false
+    }).catch(() => {});
+    const isActive = resp && resp.status === 200;
+    client.emit("is_ft_active_result", isActive);
+  }
+
+  const disconnect = async () => {
+    stan.close();
+  }
+
   client.on("create_channel", createChannel);
   client.on("send_message", sendMessage);
   client.on("get_channels", getChannels);
@@ -260,6 +293,8 @@ const handler = async client => {
   client.on("get_dashboard", getDashboard);
   client.on("get_messages", getMessages);
   client.on("is_online", isOnline);
+  client.on("is_ft_active", isFTActive);
+  client.on("disconnect", disconnect);
 
   monitoring = await isMonitoring();
 };

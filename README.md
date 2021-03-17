@@ -2,10 +2,7 @@
 
 Powerful dashboard for the [Nats Streaming](https://nats-io.github.io/docs/nats_streaming/intro.html)
 
-<a href="https://www.npmjs.com/package/nats-streaming-ui"><img src="https://badgen.net/npm/v/nats-streaming-ui?icon=npm&label" alt="NPM" title="NPM" /></a>
-<img src="https://badgen.net/npm/license/nats-streaming-ui" />
-
-<img src="https://gitlab.com/united-travel-tickets/common/nats-streaming-ui/raw/master/docs/screenshots.gif" alt="Nats Streaming UI" />
+<img src="https://raw.github.com/GNURub/nats-streaming-ui/master/docs/screenshots.gif" alt="Nats Streaming UI" />
 
 ## Features
 
@@ -17,7 +14,7 @@ Powerful dashboard for the [Nats Streaming](https://nats-io.github.io/docs/nats_
 ## How to run with Docker
 
 ```shell script
-docker-compose build && docker-compose up
+docker-compose up --build
 ```
 
 Follow the link http://127.0.0.1:8282
@@ -25,7 +22,7 @@ Follow the link http://127.0.0.1:8282
 ## How to run locally
 
 ```shell script
-git https://gitlab.com/united-travel-tickets/common/nats-streaming-ui.git
+git clone git@github.com:GNURub/nats-streaming-ui.git
 cd nats-streaming-ui
 yarn run build:react
 node ./server/index.js
@@ -33,7 +30,7 @@ node ./server/index.js
 
 ## Issues
 
-Let us know about any issues by [GitLab](https://gitlab.com/united-travel-tickets/common/nats-streaming-ui/issues)
+Let us know about any issues by [Github](https://github.com/GNURub/nats-streaming-ui/issues)
 
 ## Credits
 
@@ -41,7 +38,7 @@ Let us know about any issues by [GitLab](https://gitlab.com/united-travel-ticket
 - [Socket.io](https://socket.io/)
 - [Express](https://expressjs.com)
 - [material-ui](https://material-ui.com/)
-- [nats-nerve](https://www.npmjs.com/package/nats-nerve)
+- [stan.js](https://www.npmjs.com/package/node-nats-streaming)
 - [shortid](https://www.npmjs.com/package/shortid)
 - [axios](https://www.npmjs.com/package/axios)
 - [clsx](https://www.npmjs.com/package/clsx)

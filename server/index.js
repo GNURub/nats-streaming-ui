@@ -1,5 +1,5 @@
 const { createServer } = require("http");
-const Socketio = require("socket.io");
+const io = require("socket.io")();
 const serveStatic = require("serve-static");
 const finalhandler = require("finalhandler");
 
@@ -27,6 +27,5 @@ app.listen(8282, () => {
   );
 });
 
-const io = new Socketio(app);
-
+io.attach(app);
 io.on("connection", handler);
