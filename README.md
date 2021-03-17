@@ -19,6 +19,29 @@ docker-compose up --build
 
 Follow the link http://127.0.0.1:8282
 
+[Docker Image](https://hub.docker.com/r/gnurub/nats-streaming-ui)
+
+```shell script
+docker run -d -e STAN_URL=nats://127.0.0.1:4222 -e STAN_MONITOR_URL=http://127.0.0.1:8222 -e STAN_CLUSTER=test-cluster -p 8282:8282 gnurub/nats-streaming-ui
+```
+
+### Docker Compose example
+``` yaml
+version: "3"
+services:
+  nats-streaming:
+    image: nats-streaming:latest
+
+  nats-streaming-ui:
+    image: 'gnurub/nats-streaming-ui:latest'
+    environment:
+      STAN_URL: "nats://nats-streaming:4222"
+      STAN_MONITOR_URL: "http://nats-streaming:8222"
+      STAN_CLUSTER: "test-clusterd"
+    ports:
+      - "8282:8282"
+```
+
 ## How to run locally
 
 ```shell script
